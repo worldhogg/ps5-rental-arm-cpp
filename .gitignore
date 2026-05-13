@@ -1,0 +1,55 @@
+# Build folders
+build/
+cmake-build-*/
+out/
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# Qt Creator
+*.pro.user
+*.pro.user.*
+CMakeLists.txt.user
+*.autosave
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# CLion
+.idea/
+
+# Binaries
+*.o
+*.obj
+*.exe
+*.app
+*.dSYM/
+*.dll
+*.so
+*.dylib
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.bak
+
+# Local AI assistant files
+.claude/
+CLAUDE.md
+Claude.md
+claude.md
+
+# Local AI assistant files
+.claude/
+CLAUDE.md
+Claude.md
+claude.md

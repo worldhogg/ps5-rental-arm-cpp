@@ -1,0 +1,258 @@
+@startuml АРМ аренды PS5
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #F5F5F5
+    BorderColor #555555
+    ArrowColor #333333
+    FontName Arial
+}
+
+' ─────────────────────────────────────────────────────────────────
+' Перечисления
+' ─────────────────────────────────────────────────────────────────
+
+enum ConsoleStatus {
+    Free
+    Reserved
+    Rented
+    CheckReturn
+    Unavailable
+}
+
+enum RentalStatus {
+    Created
+    Active
+    CheckReturn
+    Completed
+    Canceled
+}
+
+enum ContractStatus {
+    Signed
+    Active
+    Closed
+    ManualReview
+}
+
+' ─────────────────────────────────────────────────────────────────
+' Классы
+' ─────────────────────────────────────────────────────────────────
+
+class Client {
+    - m_fullName : QString
+    - m_phone : QString
+    - m_documentNumber : QString
+    + getFullName() : QString
+    + getPhone() : QString
+    + getDocumentNumber() : QString
+    + setFullName(name : QString)
+    + setPhone(phone : QString)
+    + setDocumentNumber(doc : QString)
+}
+
+class ConsoleDevice {
+    - m_id : int
+    - m_name : QString
+    - m_pricePerDay : double
+    - m_status : ConsoleStatus
+    + getId() : int
+    + getName() : QString
+    + getPricePerDay() : double
+    + getStatus() : ConsoleStatus
+    + setStatus(status : ConsoleStatus)
+    + getStatusText() : QString
+}
+
+class Game {
+    - m_id : int
+    - m_title : QString
+    - m_pricePerDay : double
+    + getId() : int
+    + getTitle() : QString
+    + getPricePerDay() : double
+}
+
+class RentalOrder {
+    - m_orderId : int
+    - m_client : Client
+    - m_console : ConsoleDevice
+    - m_startDate : QDate
+    - m_endDate : QDate
+    - m_extraGamepads : int
+    - m_selectedGames : QVector<Game>
+    - m_rentalStatus : RentalStatus
+    + getOrderId() : int
+    + getDaysCount() : int
+    + getTotalPrice() : double
+    + getRentalStatus() : RentalStatus
+    + setRentalStatus(status : RentalStatus)
+    + getRentalStatusText() : QString
+    + {static} gamepadPricePerDay() : double
+}
+
+class RentalContract {
+    - m_id : int
+    - m_orderId : int
+    - m_contractNumber : QString
+    - m_clientName : QString
+    - m_signedDate : QDate
+    - m_closedDate : QDate
+    - m_status : ContractStatus
+    + getId() : int
+    + getOrderId() : int
+    + getContractNumber() : QString
+    + getStatus() : ContractStatus
+    + getStatusText() : QString
+    + activate()
+    + close()
+    + sendToManualReview()
+    + isClosed() : bool
+}
+
+class ReturnCheckResult {
+    - m_powerOk : bool
+    - m_hdmiOk : bool
+    - m_controllerOk : bool
+    - m_storageOk : bool
+    - m_accessoriesOk : bool
+    + isPassed() : bool
+    + getSummary() : QString
+    + isPowerOk() : bool
+    + isHdmiOk() : bool
+    + isControllerOk() : bool
+    + isStorageOk() : bool
+    + isAccessoriesOk() : bool
+}
+
+class ReturnMediaRecord {
+    - m_photoPath : QString
+    - m_videoPath : QString
+    - m_externalCondition : QString
+    - m_adminComment : QString
+    + hasPhoto() : bool
+    + hasVideo() : bool
+    + isComplete() : bool
+    + needsManualReview() : bool
+    + getPhotoPath() : QString
+    + getVideoPath() : QString
+    + getExternalCondition() : QString
+    + getAdminComment() : QString
+    + setPhotoPath(path : QString)
+    + setVideoPath(path : QString)
+    + setExternalCondition(cond : QString)
+    + setAdminComment(comment : QString)
+}
+
+class ReturnBoxSimulator {
+    + runFullCheck(console : ConsoleDevice, extraControllers : int) : ReturnCheckResult
+    - checkPower() : bool
+    - checkHdmi() : bool
+    - checkController(extra : int) : bool
+    - checkStorage() : bool
+    - checkAccessories() : bool
+}
+
+class RentalManager {
+    - m_consoles : QVector<ConsoleDevice>
+    - m_games : QVector<Game>
+    - m_orders : QVector<RentalOrder>
+    - m_contracts : QVector<RentalContract>
+    - m_nextOrderId : int
+    - m_nextContractId : int
+    + getConsoles() : QVector<ConsoleDevice>&
+    + getAvailableGames() : QVector<Game>&
+    + getOrders() : QVector<RentalOrder>&
+    + createOrder(...) : bool
+    + calculatePrice(...) : double
+    + startOrder(orderId : int) : bool
+    + sendToReturnCheck(orderId : int) : bool
+    + completeOrder(orderId : int) : bool
+    + cancelOrder(orderId : int) : bool
+    + closeContractForOrder(orderId : int)
+    + sendContractToManualReview(orderId : int)
+    + getContractByOrderId(orderId : int) : RentalContract*
+    + exportOrdersToCsv(filePath : QString) : bool
+    - createContractForOrder(order : RentalOrder)
+    - initConsoles()
+    - initGames()
+    - findOrderIndex(orderId : int) : int
+    - findConsoleIndex(deviceId : int) : int
+    - findContractIndexByOrderId(orderId : int) : int
+}
+
+class ConsoleOpenGLWidget {
+    - m_consoles : QVector<ConsoleDevice>
+    + updateConsoles(consoles : QVector<ConsoleDevice>)
+    # initializeGL()
+    # resizeGL(w : int, h : int)
+    # paintGL()
+    - drawConsoleCard(x, y, w, h, status)
+    - drawPS5Silhouette(cx, cy, cw, ch)
+    - setColorByStatus(status : ConsoleStatus)
+}
+
+class MainWindow {
+    - m_manager : RentalManager
+    - m_boxSimulator : ReturnBoxSimulator
+    - m_glWidget : ConsoleOpenGLWidget*
+    - m_tableOrders : QTableWidget*
+    - m_boxCheckedOrderId : int
+    - m_boxCheckPassed : bool
+    - m_mediaRecordSaved : bool
+    - m_currentMedia : ReturnMediaRecord
+    + setupUi()
+    - onCalculateClicked()
+    - onCreateOrderClicked()
+    - onStartOrderClicked()
+    - onReturnCheckClicked()
+    - onCompleteOrderClicked()
+    - onCancelOrderClicked()
+    - onExportCsvClicked()
+    - onRunBoxCheckClicked()
+    - onAddPhotoClicked()
+    - onAddVideoClicked()
+    - onSaveInspectionClicked()
+    - refreshOrderTable()
+    - refreshConsoleCombo()
+    - applyOrderAction(action)
+    - resetBoxCheckState()
+}
+
+' ─────────────────────────────────────────────────────────────────
+' Связи
+' ─────────────────────────────────────────────────────────────────
+
+' Перечисления
+ConsoleDevice --> ConsoleStatus : использует
+RentalOrder --> RentalStatus : использует
+RentalContract --> ContractStatus : использует
+
+' RentalOrder содержит снимки объектов
+RentalOrder *-- Client : содержит
+RentalOrder *-- ConsoleDevice : содержит снимок
+RentalOrder "0..*" *-- Game : содержит список
+
+' RentalContract привязан к заказу
+RentalContract --> RentalOrder : привязан к (orderId)
+
+' RentalManager агрегирует
+RentalManager "1" o-- "3" ConsoleDevice : хранит
+RentalManager "1" o-- "5" Game : хранит
+RentalManager "1" o-- "0..*" RentalOrder : хранит
+RentalManager "1" o-- "0..*" RentalContract : хранит
+
+' ReturnBoxSimulator
+ReturnBoxSimulator --> ConsoleDevice : проверяет
+ReturnBoxSimulator ..> ReturnCheckResult : возвращает
+
+' MainWindow
+MainWindow --> RentalManager : использует
+MainWindow --> ConsoleOpenGLWidget : владеет
+MainWindow --> ReturnBoxSimulator : использует
+MainWindow --> ReturnMediaRecord : хранит
+
+' ConsoleOpenGLWidget
+ConsoleOpenGLWidget --> ConsoleDevice : отображает
+
+@enduml
