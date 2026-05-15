@@ -128,10 +128,6 @@ ps5-rental-arm-cpp/
 
 ## UML-диаграмма классов
 
-Файл: [diagrams/uml.puml](diagrams/uml.puml)
-
-Инструкция по просмотру: [diagrams/README.md](diagrams/README.md)
-
 Диаграмма описывает:
 - 6 классов: `Client`, `ConsoleDevice`, `Game`, `RentalOrder`, `RentalManager`, `ConsoleOpenGLWidget`, `MainWindow`
 - 2 перечисления: `ConsoleStatus`, `RentalStatus`
@@ -180,25 +176,7 @@ ps5-rental-arm-cpp/
 
 ---
 
-## Сборка и запуск
 
-### Требования
-- CMake ≥ 3.16
-- Qt 6 (Widgets, OpenGL, OpenGLWidgets)
-- C++17-совместимый компилятор (Clang / GCC / MSVC)
-
-### macOS (Homebrew)
-```bash
-# Установить Qt 6
-brew install qt6
-
-# Клонировать проект
-git clone <url> ps5-rental-arm-cpp
-cd ps5-rental-arm-cpp
-
-# Собрать
-cmake -S . -B build -DCMAKE_PREFIX_PATH=$(brew --prefix qt6)
-cmake --build build --parallel
 
 # Запустить
 ./build/ps5-rental-arm-cpp
@@ -212,12 +190,7 @@ cmake --build build --parallel
 ./build/ps5-rental-arm-cpp
 ```
 
-### Windows (Qt Online Installer)
-1. Установить Qt 6 через [Qt Online Installer](https://www.qt.io/download-qt-installer)
-2. Открыть проект в Qt Creator или Visual Studio с CMake-плагином
-3. Собрать и запустить
 
----
 
 ## Как пользоваться программой
 
@@ -298,7 +271,4 @@ cmake --build build --parallel
 
 ---
 
-## Автор
 
-Студент: Сидицев Артём  
-Учебный проект по дисциплине «Программирование»
