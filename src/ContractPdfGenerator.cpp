@@ -163,11 +163,10 @@ QString ContractPdfGenerator::buildHtml(const RentalOrder& order,
 <!--  ДОГОВОР АРЕНДЫ                                              -->
 <!-- ============================================================ -->
 <h2>ДОГОВОР АРЕНДЫ</h2>
-<p style="text-align:right;"><b>г. Пермь</b> &nbsp;&nbsp;&nbsp; «___» ____________ 20___ г. &nbsp;&nbsp;&nbsp; № <b>%CONTRACT_NUM%</b></p>
+<p style="text-align:right;"><b>г. Пермь</b> &nbsp;&nbsp;&nbsp; «___» ____________ 20___ г. &nbsp;&nbsp;&nbsp; № <b><nobr>%CONTRACT_NUM%</nobr></b></p>
 
 <p>
 <span class="underline">%CLIENT_NAME%</span>,
-зарегистрированный по адресу: <span class="underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>,
 паспорт (документ): <span class="underline">%CLIENT_DOC%</span>,
 именуемый в дальнейшем <b>«Арендатор»</b>, действующий от своего имени и в своих
 интересах, с одной стороны, и <b>Лернер Егор Яковлевич</b>, именуемый в дальнейшем
