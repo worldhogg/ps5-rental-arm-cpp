@@ -62,7 +62,15 @@ QString ContractPdfGenerator::buildHtml(const RentalOrder& order,
     QString clientDoc    = client.getDocumentNumber().toHtmlEscaped();
     QString contractNum  = contract.getContractNumber().toHtmlEscaped();
     QString consoleName  = console.getName().toHtmlEscaped();
-    QString signedDate   = contract.getSignedDate().toString("dd.MM.yyyy");
+    QDate   signedDateObj = contract.getSignedDate();
+    QString signedDate   = signedDateObj.toString("dd.MM.yyyy");
+    QString signedDay    = signedDateObj.toString("d");
+    QString signedYear   = signedDateObj.toString("yyyy");
+    static const char* const kMonths[] = {
+        "января","февраля","марта","апреля","мая","июня",
+        "июля","августа","сентября","октября","ноября","декабря"
+    };
+    QString signedMonth  = QString::fromUtf8(kMonths[signedDateObj.month() - 1]);
     QString startDate    = order.getStartDate().toString("dd.MM.yyyy");
     QString endDate      = order.getEndDate().toString("dd.MM.yyyy");
     int     days         = order.getDaysCount();
@@ -162,8 +170,14 @@ QString ContractPdfGenerator::buildHtml(const RentalOrder& order,
 <!-- ============================================================ -->
 <!--  ДОГОВОР АРЕНДЫ                                              -->
 <!-- ============================================================ -->
-<h2>ДОГОВОР АРЕНДЫ</h2>
-<p style="text-align:right;"><b>г. Пермь</b> &nbsp;&nbsp;&nbsp; «___» ____________ 20___ г. &nbsp;&nbsp;&nbsp; № <b><nobr>%CONTRACT_NUM%</nobr></b></p>
+<table style="width:100%; border-collapse:collapse; margin-bottom:2px;">
+  <tr>
+    <td style="width:20%;"></td>
+    <td style="text-align:center;"><b style="font-size:13pt;">ДОГОВОР АРЕНДЫ</b></td>
+    <td style="width:20%; text-align:right; white-space:nowrap; vertical-align:bottom; font-size:10pt;">№ <b>%CONTRACT_NUM%</b></td>
+  </tr>
+</table>
+<p style="text-align:right; margin-bottom:12px;"><b>г. Пермь</b> &nbsp;&nbsp;&nbsp; «%SIGNED_DAY%» %SIGNED_MONTH% %SIGNED_YEAR% г.</p>
 
 <p>
 <span class="underline">%CLIENT_NAME%</span>,
@@ -322,9 +336,7 @@ QString ContractPdfGenerator::buildHtml(const RentalOrder& order,
 <!-- ============================================================ -->
 <!--  АКТ ПЕРЕДАЧИ                                                -->
 <!-- ============================================================ -->
-<div class="page-break"></div>
-
-<h2>Акт передачи Имущества в прокат</h2>
+<h2 style="page-break-before: always;">Акт передачи Имущества в прокат</h2>
 <p class="subtitle">к Договору аренды № <b>%CONTRACT_NUM%</b> от <b>%SIGNED_DATE%</b></p>
 
 <p><b>г. Пермь</b> &nbsp;&nbsp; ___ час ___ мин &nbsp; %START_DATE% г.</p>
@@ -373,9 +385,7 @@ QString ContractPdfGenerator::buildHtml(const RentalOrder& order,
 <!-- ============================================================ -->
 <!--  АКТ ВОЗВРАТА                                                -->
 <!-- ============================================================ -->
-<div class="page-break"></div>
-
-<h2>Акт о возврате Имущества из проката</h2>
+<h2 style="page-break-before: always;">Акт о возврате Имущества из проката</h2>
 <p class="subtitle">к Договору аренды № <b>%CONTRACT_NUM%</b> от <b>%SIGNED_DATE%</b></p>
 
 <p><b>г. Пермь</b> &nbsp;&nbsp; ___ час ___ мин &nbsp; %END_DATE% г.</p>
@@ -447,6 +457,9 @@ QString ContractPdfGenerator::buildHtml(const RentalOrder& order,
     html.replace("%CLIENT_PHONE%",   clientPhone);
     html.replace("%CLIENT_DOC%",     clientDoc);
     html.replace("%SIGNED_DATE%",    signedDate);
+    html.replace("%SIGNED_DAY%",     signedDay);
+    html.replace("%SIGNED_MONTH%",   signedMonth);
+    html.replace("%SIGNED_YEAR%",    signedYear);
     html.replace("%START_DATE%",     startDate);
     html.replace("%END_DATE%",       endDate);
     html.replace("%DAYS%",           QString::number(days));
