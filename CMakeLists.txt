@@ -7,7 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets Gui)
+find_package(Qt6 REQUIRED COMPONENTS Widgets OpenGL OpenGLWidgets Gui PrintSupport)
 
 # Заглушить предупреждения об устаревшем OpenGL API на macOS
 if(APPLE)
@@ -27,6 +27,7 @@ set(SOURCES
     src/ReturnCheckResult.cpp
     src/ReturnMediaRecord.cpp
     src/ReturnBoxSimulator.cpp
+    src/ContractPdfGenerator.cpp
 )
 
 set(HEADERS
@@ -41,6 +42,7 @@ set(HEADERS
     src/ReturnCheckResult.h
     src/ReturnMediaRecord.h
     src/ReturnBoxSimulator.h
+    src/ContractPdfGenerator.h
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
@@ -50,4 +52,5 @@ target_link_libraries(${PROJECT_NAME}
     Qt6::OpenGL
     Qt6::OpenGLWidgets
     Qt6::Gui
+    Qt6::PrintSupport
 )

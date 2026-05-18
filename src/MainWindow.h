@@ -13,6 +13,7 @@
 #include "ConsoleOpenGLWidget.h"
 #include "ReturnBoxSimulator.h"
 #include "ReturnMediaRecord.h"
+#include "ContractPdfGenerator.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -30,6 +31,11 @@ private slots:
     void onCancelOrderClicked();
 
     void onExportCsvClicked();
+
+    // Договор
+    void onGenerateContractClicked();
+    void onOpenPdfClicked();
+    void onSendToAdminClicked();
 
     // Бокс: автоматическая проверка
     void onRunBoxCheckClicked();
@@ -79,6 +85,12 @@ private:
     QPushButton* m_btnReturnCheck;
     QPushButton* m_btnCompleteOrder;
     QPushButton* m_btnCancelOrder;
+
+    // --- Кнопки договора ---
+    QPushButton* m_btnGenerateContract;
+    QPushButton* m_btnOpenPdf;
+    QPushButton* m_btnSendToAdmin;
+    QString      m_lastGeneratedPdf;
 
     // --- Блок: проверка бокса ---
     QLabel*      m_labelBoxCheckResult;

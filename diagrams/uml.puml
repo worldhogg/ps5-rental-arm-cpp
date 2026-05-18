@@ -192,6 +192,12 @@ class ConsoleOpenGLWidget {
     - setColorByStatus(status : ConsoleStatus)
 }
 
+class ContractPdfGenerator {
+    + {static} generatePdf(order : RentalOrder, contract : RentalContract) : QString
+    - {static} buildHtml(order : RentalOrder, contract : RentalContract) : QString
+    - {static} ensureContractsDir() : QString
+}
+
 class MainWindow {
     - m_manager : RentalManager
     - m_boxSimulator : ReturnBoxSimulator
@@ -201,6 +207,7 @@ class MainWindow {
     - m_boxCheckPassed : bool
     - m_mediaRecordSaved : bool
     - m_currentMedia : ReturnMediaRecord
+    - m_lastGeneratedPdf : QString
     + setupUi()
     - onCalculateClicked()
     - onCreateOrderClicked()
@@ -209,6 +216,9 @@ class MainWindow {
     - onCompleteOrderClicked()
     - onCancelOrderClicked()
     - onExportCsvClicked()
+    - onGenerateContractClicked()
+    - onOpenPdfClicked()
+    - onSendToAdminClicked()
     - onRunBoxCheckClicked()
     - onAddPhotoClicked()
     - onAddVideoClicked()
@@ -246,11 +256,16 @@ RentalManager "1" o-- "0..*" RentalContract : хранит
 ReturnBoxSimulator --> ConsoleDevice : проверяет
 ReturnBoxSimulator ..> ReturnCheckResult : возвращает
 
+' ContractPdfGenerator
+ContractPdfGenerator ..> RentalOrder : читает
+ContractPdfGenerator ..> RentalContract : читает
+
 ' MainWindow
 MainWindow --> RentalManager : использует
 MainWindow --> ConsoleOpenGLWidget : владеет
 MainWindow --> ReturnBoxSimulator : использует
 MainWindow --> ReturnMediaRecord : хранит
+MainWindow ..> ContractPdfGenerator : вызывает
 
 ' ConsoleOpenGLWidget
 ConsoleOpenGLWidget --> ConsoleDevice : отображает

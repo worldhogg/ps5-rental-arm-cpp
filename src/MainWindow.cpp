@@ -10,6 +10,9 @@
 #include <QSplitter>
 #include <QStandardItemModel>
 #include <QFileDialog>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QFileInfo>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
@@ -205,6 +208,35 @@ void MainWindow::setupUi() {
     actionsLayout->addWidget(btnExportCsv);
 
     ordersLayout->addWidget(groupActions);
+
+    // --- Кнопки договора ---
+    QGroupBox* groupContract = new QGroupBox("Договор");
+    QHBoxLayout* contractLayout = new QHBoxLayout(groupContract);
+
+    m_btnGenerateContract = new QPushButton("Сгенерировать договор");
+    m_btnGenerateContract->setToolTip("Создать PDF-договор для выбранного заказа");
+    m_btnGenerateContract->setStyleSheet("background-color:#0277bd;color:white;font-weight:bold;");
+    connect(m_btnGenerateContract, &QPushButton::clicked,
+            this, &MainWindow::onGenerateContractClicked);
+
+    m_btnOpenPdf = new QPushButton("Открыть PDF");
+    m_btnOpenPdf->setToolTip("Открыть последний сгенерированный договор");
+    m_btnOpenPdf->setEnabled(false);
+    connect(m_btnOpenPdf, &QPushButton::clicked,
+            this, &MainWindow::onOpenPdfClicked);
+
+    m_btnSendToAdmin = new QPushButton("Отправить администратору");
+    m_btnSendToAdmin->setToolTip("Открыть почтовый клиент с прикреплённым договором");
+    m_btnSendToAdmin->setEnabled(false);
+    connect(m_btnSendToAdmin, &QPushButton::clicked,
+            this, &MainWindow::onSendToAdminClicked);
+
+    contractLayout->addWidget(m_btnGenerateContract);
+    contractLayout->addWidget(m_btnOpenPdf);
+    contractLayout->addWidget(m_btnSendToAdmin);
+    contractLayout->addStretch();
+
+    ordersLayout->addWidget(groupContract);
     rightLayout->addWidget(groupOrders, 1);
 
     // ============================================================
@@ -694,6 +726,74 @@ QVector<int> MainWindow::getSelectedGameIndices() const {
             indices.append(i);
     }
     return indices;
+}
+
+// ================================================================
+// Генерация PDF договора
+// ================================================================
+
+void MainWindow::onGenerateContractClicked() {
+    int row = m_tableOrders->currentRow();
+    if (row < 0) {
+        QMessageBox::information(this, "Выберите заказ",
+            "Выберите заказ в таблице перед генерацией договора.");
+        return;
+    }
+
+    bool ok;
+    int orderId = m_tableOrders->item(row, 0)->text().toInt(&ok);
+    if (!ok) return;
+
+    const RentalContract* contract = m_manager.getContractByOrderId(orderId);
+    if (!contract) {
+        QMessageBox::warning(this, "Ошибка", "Договор для выбранного заказа не найден.");
+        return;
+    }
+
+    const auto& orders = m_manager.getOrders();
+    int oi = -1;
+    for (int i = 0; i < orders.size(); ++i) {
+        if (orders[i].getOrderId() == orderId) { oi = i; break; }
+    }
+    if (oi < 0) return;
+
+    QString path = ContractPdfGenerator::generatePdf(orders[oi], *contract);
+    if (path.isEmpty()) {
+        QMessageBox::warning(this, "Ошибка", "Не удалось создать PDF-файл.\nПроверьте права доступа к папке Documents.");
+        return;
+    }
+
+    m_lastGeneratedPdf = path;
+    m_btnOpenPdf->setEnabled(true);
+    m_btnSendToAdmin->setEnabled(true);
+
+    QMessageBox::information(this, "Договор сгенерирован",
+        QString("PDF сохранён:\n%1").arg(path));
+}
+
+void MainWindow::onOpenPdfClicked() {
+    if (m_lastGeneratedPdf.isEmpty()) return;
+    QDesktopServices::openUrl(QUrl::fromLocalFile(m_lastGeneratedPdf));
+}
+
+void MainWindow::onSendToAdminClicked() {
+    if (m_lastGeneratedPdf.isEmpty()) return;
+
+    // Учебная реализация: открываем почтовый клиент через mailto:
+    // Прикрепление файла через mailto: не стандартизировано, но тема и тело формируются
+    QString subject = QUrl::toPercentEncoding(
+        QString("Договор аренды PS5 — %1").arg(
+            QFileInfo(m_lastGeneratedPdf).baseName()));
+    QString body = QUrl::toPercentEncoding(
+        QString("Добрый день!\n\nПрошу ознакомиться с договором аренды.\n"
+                "Файл: %1").arg(m_lastGeneratedPdf));
+
+    QString mailtoUrl = QString("mailto:art_shidichev07@mail.ru"
+                                "?subject=%1&body=%2")
+                        .arg(subject)
+                        .arg(body);
+
+    QDesktopServices::openUrl(QUrl(mailtoUrl));
 }
 
 bool MainWindow::validateInput(QString& errorMsg) const {
