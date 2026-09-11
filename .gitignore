@@ -15,7 +15,6 @@ compile_commands.json
 *.pro.user.*
 CMakeLists.txt.user
 *.autosave
-
 # macOS
 .DS_Store
 
@@ -48,8 +47,5 @@ CLAUDE.md
 Claude.md
 claude.md
 
-# Local AI assistant files
-.claude/
-CLAUDE.md
-Claude.md
-claude.md
+# Сгенерированный экспорт
+orders.csv
